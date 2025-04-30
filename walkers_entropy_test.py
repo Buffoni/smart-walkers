@@ -4,11 +4,11 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 NUMBER_OF_SQUARES = 11
-NUMBER_OF_GAMES = int(1e4)
+NUMBER_OF_GAMES = int(1e3)
 START_POS_ALICE = 1
 START_POS_BOB = NUMBER_OF_SQUARES - 2
 
-GAMES_FOR_ENTROPY_OF_POSITION_CALCULATION = int(1e1)
+GAMES_FOR_ENTROPY_OF_POSITION_CALCULATION = int(1e2)
 PLOT_NEGENTROPY = False
 
 np.set_printoptions(formatter={'float': '{: 0.2f}'.format}, linewidth=100)
