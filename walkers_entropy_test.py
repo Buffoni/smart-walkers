@@ -183,6 +183,11 @@ def play_one_game(walker_1, walker_2, world_dimension, learning=True):
 #-----------------------------------------------------------------------------------
 
 def calculate_entropy_of_positions(walker_positions):
+  # First we calculate the normalization constant
+
+  norm_constant = np.log(NUMBER_OF_SQUARES)
+
+  # Then we calculate the entropies
   probs = np.zeros(NUMBER_OF_SQUARES)
 
   for i in range(NUMBER_OF_SQUARES):
@@ -191,19 +196,30 @@ def calculate_entropy_of_positions(walker_positions):
   entropy = -np.sum(probs * np.log(probs + 1e-10))
   negentropy = np.log(NUMBER_OF_SQUARES + 1e-10) - entropy
 
+  # Normalize the entropy
+  entropy /= norm_constant
+  negentropy /= norm_constant
+
   return entropy, negentropy
 
 #-----------------------------------------------------------------------------------
 
 def calculate_entropy_of_probability_tensor(probability_tensor):
+  # First we calculate the normalization constant
+  norm_constant = np.log(probability_tensor.shape[2])*probability_tensor.shape[0]**2
+
+  # Then we calculate the entropies
   entropy = 0
   for i in range(probability_tensor.shape[0]):
     for j in range(probability_tensor.shape[1]):
       for k in range(probability_tensor.shape[2]):
-        entropy -= probability_tensor[i, j, k] * np.log(probability_tensor[i, j, k] + 1e-10)
+        entropy -= probability_tensor[i, j, k] * np.log(probability_tensor[i, j, k])
 
-  maximum_possible_entropy = np.log(probability_tensor.shape[2] + 1e-10) * probability_tensor.shape[0] * probability_tensor.shape[1]
-  negentropy = maximum_possible_entropy - entropy
+  negentropy = norm_constant - entropy
+
+  # Normalize the entropy
+  entropy /= norm_constant
+  negentropy /= norm_constant
 
   return entropy, negentropy
 
@@ -289,29 +305,36 @@ def build_matrix_A(walker_1_prob_tensor, walker_2_prob_tensor):
 #-----------------------------------------------------------------------------------
 
 def calculate_entropy_of_A(A):
+  # Calculate the normalization constant
+  norm_constant = np.log(A.shape[0])  
+
   # Find eigenvector with corresponding eigenvalue 1
-    eigenvalues, eigenvectors = np.linalg.eig(A)
+  eigenvalues, eigenvectors = np.linalg.eig(A)
 
-    eigenvector = None
-    
-    for i in range(len(eigenvalues)):
-      if np.isreal(eigenvalues[i]) and eigenvalues[i] - 1 < 1e-10:
-        eigenvector = eigenvectors[:, i]
-        break
-    
-    if eigenvector is None:
-      raise Exception('Eigenvector with eigenvalue 1 not found')
-    
-    # Normalize the eigenvector
-    eigenvector = np.real(eigenvector)
-    eigenvector = eigenvector / np.sum(eigenvector)
+  eigenvector = None
+  
+  for i in range(len(eigenvalues)):
+    if np.isreal(eigenvalues[i]) and eigenvalues[i] - 1 < 1e-10:
+      eigenvector = eigenvectors[:, i]
+      break
+  
+  if eigenvector is None:
+    raise Exception('Eigenvector with eigenvalue 1 not found')
+  
+  # Normalize the eigenvector
+  eigenvector = np.real(eigenvector)
+  eigenvector = eigenvector / np.sum(eigenvector)
 
-    # Calculate the entropy
-    entropy = -np.sum(eigenvector * np.log(eigenvector + 1e-10))
+  # Calculate the entropy
+  entropy = -np.sum(eigenvector * np.log(eigenvector + 1e-10))
 
-    negentropy = np.log(A.shape[0] + 1e-10) - entropy
+  negentropy = np.log(A.shape[0] + 1e-10) - entropy
 
-    return entropy, negentropy
+  # Normalize the entropies
+  entropy /= norm_constant
+  negentropy /= norm_constant
+
+  return entropy, negentropy
 
 #-----------------------------------------------------------------------------------
 # MAIN
@@ -352,18 +375,11 @@ if __name__ == '__main__':
   bob_cumulative_rewards.append(0)
 
   for _ in tqdm(range(NUMBER_OF_GAMES)):
-    # Play one game
-    alice_reward, bob_reward, _,_,_,_ = play_one_game(alice, bob, NUMBER_OF_SQUARES, learning=True)
-    alice_cumulative_rewards.append(alice_cumulative_rewards[-1] + alice_reward)
-    bob_cumulative_rewards.append(bob_cumulative_rewards[-1] + bob_reward)
 
     # Calculate the probability tensor
 
     alice_probability_tensor = alice.get_policy_tensor()
     bob_probability_tensor = bob.get_policy_tensor()
-
-    impose_reflective_boundary_conditions(alice_probability_tensor)
-    impose_reflective_boundary_conditions(bob_probability_tensor)
 
     # Calculate the entropy of the probability tensor
     alice_entropy, alice_negentropy = calculate_entropy_of_probability_tensor(alice_probability_tensor)
@@ -372,6 +388,14 @@ if __name__ == '__main__':
     bob_entropy_of_tensor.append(bob_entropy)
     alice_negentropy_of_tensor.append(alice_negentropy)
     bob_negentropy_of_tensor.append(bob_negentropy)
+
+    # Play one game
+    alice_reward, bob_reward, _,_,_,_ = play_one_game(alice, bob, NUMBER_OF_SQUARES, learning=True)
+    alice_cumulative_rewards.append(alice_cumulative_rewards[-1] + alice_reward)
+    bob_cumulative_rewards.append(bob_cumulative_rewards[-1] + bob_reward)
+
+    impose_reflective_boundary_conditions(alice_probability_tensor)
+    impose_reflective_boundary_conditions(bob_probability_tensor)
 
     # Build the matrix A
 
@@ -398,28 +422,6 @@ if __name__ == '__main__':
     bob_entropy_of_position.append(bob_position_entropy)
     alice_negentropy_of_position.append(alice_position_negentropy)
     bob_negentropy_of_position.append(bob_position_negentropy)
-
-  #Plot the results
-  if PLOT_NEGENTROPY:
-    plt.plot(alice_negentropy_of_tensor, label='Negentropy of tensor')
-    plt.plot(alice_negentropy_of_position, label='Negentropy of position')
-    plt.plot(bob_negentropy_of_tensor, label='Bob negentropy of tensor')
-    plt.plot(bob_negentropy_of_position, label='Bob negentropy of position')
-    plt.plot(A_negentropys, label='Negentropy of A')
-
-  plt.plot(alice_entropy_of_tensor, label='Entropy of tensor')
-  plt.plot(alice_entropy_of_position, label='Entropy of position')
-  plt.plot(bob_entropy_of_tensor, label='Bob entropy of tensor')
-  plt.plot(bob_entropy_of_position, label='Bob entropy of position')
-  plt.plot(A_entropys, label='Entropy of A')
-
-  plt.xlabel('Games')
-  plt.ylabel('Entropy')
-  plt.title('Entropy of the walkers')
-  plt.legend()
-  plt.savefig(os.path.join('Entropy_Outputs', 'entropy_of_walkers.png'))
-
-  plt.clf()
 
   # Make the 3 plots of entropy separately
 
