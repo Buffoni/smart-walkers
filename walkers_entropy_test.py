@@ -135,14 +135,20 @@ def check_end_game(walker_1, walker_2):
 
 #-----------------------------------------------------------------------------------
 
-def calculate_reward(meeting_square, world_dimension):
+def calculate_reward(meeting_square, world_dimension, time):
+
   walker_1_reward = ((world_dimension - 1)/ 2) - meeting_square
   walker_2_reward = meeting_square - ((world_dimension - 1) / 2)
+
+  if time != False:
+    walker_1_reward = walker_1_reward - time * (1/world_dimension)
+    walker_2_reward = walker_2_reward - time * (1/world_dimension)
+
   return walker_1_reward, walker_2_reward
 
 #-----------------------------------------------------------------------------------
 
-def play_one_game(walker_1, walker_2, world_dimension, learning=True):
+def play_one_game(walker_1, walker_2, world_dimension, learning=True, time=False):
   # Reset the walkers
   walker_1.reset()
   walker_2.reset()
@@ -158,6 +164,9 @@ def play_one_game(walker_1, walker_2, world_dimension, learning=True):
 
     end_game, compenetration = check_end_game(walker_1, walker_2)
 
+    if time != False:
+      time = moves
+
     if end_game:
 
       if walker_1.position != walker_2.position:
@@ -168,6 +177,7 @@ def play_one_game(walker_1, walker_2, world_dimension, learning=True):
       walker_1_reward, walker_2_reward = calculate_reward(
           meeting_square,
           world_dimension,
+          time=time
         )
       if learning:
         walker_1.update_brain(walker_1_reward, walker_2.position)
@@ -354,6 +364,9 @@ if __name__ == '__main__':
   alice = Walker('Alice', START_POS_ALICE, NUMBER_OF_SQUARES, use_brain=True)
   bob = Walker('Bob', START_POS_BOB, NUMBER_OF_SQUARES, use_brain=False)
 
+  alice_t = Walker('Alice', START_POS_ALICE, NUMBER_OF_SQUARES, use_brain=True)
+  bob_t = Walker('Bob', START_POS_BOB, NUMBER_OF_SQUARES, use_brain=False)
+
   # Start training loop
 
   alice_entropy_of_tensor = []
@@ -374,6 +387,24 @@ if __name__ == '__main__':
   alice_cumulative_rewards.append(0)
   bob_cumulative_rewards.append(0)
 
+  alice_entropy_of_tensor_t = []
+  alice_negentropy_of_tensor_t = []
+  alice_entropy_of_position_t = []
+  alice_negentropy_of_position_t = []
+
+  bob_entropy_of_tensor_t = []
+  bob_negentropy_of_tensor_t = []
+  bob_entropy_of_position_t = []
+  bob_negentropy_of_position_t = []
+
+  A_entropys_t = []
+  A_negentropys_t = []
+
+  alice_cumulative_rewards_t = []
+  bob_cumulative_rewards_t = []
+  alice_cumulative_rewards_t.append(0)
+  bob_cumulative_rewards_t.append(0)
+
   for _ in tqdm(range(NUMBER_OF_GAMES)):
 
     # Calculate the probability tensor
@@ -389,11 +420,6 @@ if __name__ == '__main__':
     alice_negentropy_of_tensor.append(alice_negentropy)
     bob_negentropy_of_tensor.append(bob_negentropy)
 
-    # Play one game
-    alice_reward, bob_reward, _,_,_,_ = play_one_game(alice, bob, NUMBER_OF_SQUARES, learning=True)
-    alice_cumulative_rewards.append(alice_cumulative_rewards[-1] + alice_reward)
-    bob_cumulative_rewards.append(bob_cumulative_rewards[-1] + bob_reward)
-
     impose_reflective_boundary_conditions(alice_probability_tensor)
     impose_reflective_boundary_conditions(bob_probability_tensor)
 
@@ -408,6 +434,7 @@ if __name__ == '__main__':
     A_negentropys.append(A_negentropy)
 
     # Calculate the entropy of the positions
+
     concat_alice_positions = []
     concat_bob_positions = []
 
@@ -423,9 +450,47 @@ if __name__ == '__main__':
     alice_negentropy_of_position.append(alice_position_negentropy)
     bob_negentropy_of_position.append(bob_position_negentropy)
 
+    # Play one game
+    alice_reward, bob_reward, _,_,_,_ = play_one_game(alice, bob, NUMBER_OF_SQUARES, learning=True)
+    alice_cumulative_rewards.append(alice_cumulative_rewards[-1] + alice_reward)
+    bob_cumulative_rewards.append(bob_cumulative_rewards[-1] + bob_reward)
+
+    # LETS DO THE SAME THING WITH TIME!
+
+    alice_probability_tensor_t = alice_t.get_policy_tensor()
+    bob_probability_tensor_t = bob_t.get_policy_tensor()
+    alice_entropy_t, alice_negentropy_t = calculate_entropy_of_probability_tensor(alice_probability_tensor_t)
+    bob_entropy_t, bob_negentropy_t = calculate_entropy_of_probability_tensor(bob_probability_tensor_t)
+    alice_entropy_of_tensor_t.append(alice_entropy_t)
+    bob_entropy_of_tensor_t.append(bob_entropy_t)
+    alice_negentropy_of_tensor_t.append(alice_negentropy_t)
+    bob_negentropy_of_tensor_t.append(bob_negentropy_t)
+    impose_reflective_boundary_conditions(alice_probability_tensor_t)
+    impose_reflective_boundary_conditions(bob_probability_tensor_t)
+    A_t = build_matrix_A(alice_probability_tensor_t, bob_probability_tensor_t)
+    A_entropy_t, A_negentropy_t = calculate_entropy_of_A(A_t)
+    A_entropys_t.append(A_entropy_t)
+    A_negentropys_t.append(A_negentropy_t)
+    concat_alice_positions_t = []
+    concat_bob_positions_t = [] 
+    for _ in range(GAMES_FOR_ENTROPY_OF_POSITION_CALCULATION):
+      _,_,_,_, alice_positions_t, bob_positions_t = play_one_game(alice_t, bob_t, NUMBER_OF_SQUARES, learning=False)
+      concat_alice_positions_t.extend(alice_positions_t)
+      concat_bob_positions_t.extend(bob_positions_t)
+    alice_position_entropy_t, alice_position_negentropy_t = calculate_entropy_of_positions(concat_alice_positions_t)
+    bob_position_entropy_t, bob_position_negentropy_t = calculate_entropy_of_positions(concat_bob_positions_t)
+    alice_entropy_of_position_t.append(alice_position_entropy_t)
+    bob_entropy_of_position_t.append(bob_position_entropy_t)
+    alice_negentropy_of_position_t.append(alice_position_negentropy_t)
+    bob_negentropy_of_position_t.append(bob_position_negentropy_t)
+    alice_reward_t, bob_reward_t, _,_,_,_ = play_one_game(alice_t, bob_t, NUMBER_OF_SQUARES, learning=True, time=True)
+    alice_cumulative_rewards_t.append(alice_cumulative_rewards_t[-1] + alice_reward_t)
+    bob_cumulative_rewards_t.append(bob_cumulative_rewards_t[-1] + bob_reward_t)
+
   # Make the 3 plots of entropy separately
 
   plt.plot(alice_entropy_of_tensor, label='Alice entropy of tensor')
+  plt.plot(alice_entropy_of_tensor_t, label='Alice entropy of tensor with time')
   plt.plot(bob_entropy_of_tensor, label='Bob entropy of tensor')
   plt.xlabel('Games')
   plt.ylabel('Entropy of tensor')
