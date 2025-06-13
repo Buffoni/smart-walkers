@@ -314,6 +314,61 @@ def build_matrix_A(walker_1_prob_tensor, walker_2_prob_tensor):
 
 #-----------------------------------------------------------------------------------
 
+def remove_forbidden_compenetraion_processes(A):
+  A_non_comp = np.copy(A)
+  number_of_sites = np.sqrt(A.shape[0]).astype(int)
+
+  # Finding indexes of forbidden processes
+
+  indices_i_switch_processes = []
+  indices_j_switch_processes = []
+
+  for k in range(1, number_of_sites):
+    current_i = k+1+(k-1)*number_of_sites
+    current_j = k+k*number_of_sites
+    indices_i_switch_processes.append(current_i)
+    indices_j_switch_processes.append(current_j)
+
+  for k in range(2, number_of_sites+1):
+    current_i = k-1+(k-1)*number_of_sites
+    current_j = k+(k-2)*number_of_sites
+    indices_i_switch_processes.append(current_i)
+    indices_j_switch_processes.append(current_j)
+
+  current_i = 1+(number_of_sites-1)*number_of_sites
+  current_j = number_of_sites
+  indices_i_switch_processes.append(current_i)
+  indices_j_switch_processes.append(current_j)
+
+  current_i = number_of_sites
+  current_j = 1+(number_of_sites-1)*number_of_sites
+  indices_i_switch_processes.append(current_i)
+  indices_j_switch_processes.append(current_j)
+
+  number_of_transfers_needed = len(indices_i_switch_processes)
+
+  # -1 slide to conform to cs indices
+
+  for i in range(number_of_transfers_needed):
+    indices_i_switch_processes[i] -= 1
+    indices_j_switch_processes[i] -= 1
+
+  indices_i_still_processes = indices_j_switch_processes.copy()
+  indices_j_still_processes = indices_j_switch_processes.copy()
+
+  # Perform the transfer of probability mass
+
+  for i in range(number_of_transfers_needed):
+
+    A_non_comp[indices_i_still_processes[i], indices_j_still_processes[i]] += \
+      A_non_comp[indices_i_switch_processes[i], indices_j_switch_processes[i]]
+
+    A_non_comp[indices_i_switch_processes[i], indices_j_switch_processes[i]] = 0
+
+  return A_non_comp
+
+#-----------------------------------------------------------------------------------
+
 def calculate_entropy_of_A(A):
   # Calculate the normalization constant
   norm_constant = np.log(A.shape[0])  
@@ -468,6 +523,7 @@ if __name__ == '__main__':
     impose_reflective_boundary_conditions(alice_probability_tensor_t)
     impose_reflective_boundary_conditions(bob_probability_tensor_t)
     A_t = build_matrix_A(alice_probability_tensor_t, bob_probability_tensor_t)
+    A_t = remove_forbidden_compenetraion_processes(A_t)
     A_entropy_t, A_negentropy_t = calculate_entropy_of_A(A_t)
     A_entropys_t.append(A_entropy_t)
     A_negentropys_t.append(A_negentropy_t)
