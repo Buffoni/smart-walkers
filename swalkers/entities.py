@@ -2,7 +2,7 @@ import numpy as np
 from .functions import softmax
 
 class Walker():
-    def __init__(self, name, start_position, world_dimension, use_brain, learn, learning_rate=0.5, discount_factor=1, softmax_temperature=1):
+    def __init__(self, name, start_position, world_dimension, use_brain, learn, learning_rate=0.5, discount_factor=1, softmax_temperature=1, greedy=False):
         self.name = name
         self.start_position = start_position
         self.position = start_position
@@ -26,6 +26,8 @@ class Walker():
         self.use_brain = use_brain
         self.learn = learn
 
+        self.greedy = greedy
+
     def reset(self):
         self.position = self.start_position
         self.memory = {
@@ -48,9 +50,13 @@ class Walker():
 
     def choose_move(self, other_walker_position):
         if self.use_brain:
-            # Policy
-            probabilities = softmax(self.q_table[self.position, other_walker_position], self.softmax_temperature)
-            move = np.random.choice([-1, 0, 1], p=probabilities)
+            if self.greedy:
+                # Greedy policy
+                move = np.argmax(self.q_table[self.position, other_walker_position]) - 1
+            else:
+                # Policy
+                probabilities = softmax(self.q_table[self.position, other_walker_position], self.softmax_temperature)
+                move = np.random.choice([-1, 0, 1], p=probabilities)
         else:
             move = np.random.choice([-1, 0, 1])
         return move
@@ -82,12 +88,12 @@ class Walker():
             pass
       
 def linear_reward(meeting_square, world_dimension, time=None):
-    alice_reward = (world_dimension-1)/2 - meeting_square
+    alice_reward = ((world_dimension-1)/2 - meeting_square)/ ((world_dimension-1)/2)
     bob_reward = -alice_reward
     return alice_reward, bob_reward
 
 def time_dependent_linear_reward(meeting_square, world_dimension, time=0):
-    alice_reward = (world_dimension-1)/2 - meeting_square - time/world_dimension
+    alice_reward = ((world_dimension-1)/2 - meeting_square - time/((world_dimension-4)**2))/ ((world_dimension-1)/2)
     bob_reward = -alice_reward
     return alice_reward, bob_reward
 
@@ -101,6 +107,6 @@ def sinusoidal_reward(meeting_square, world_dimension, time=None):
 def high_frequency_sinusoidal_reward(meeting_square, world_dimension, time=None):
     # Normalize the meeting square to the range [0, 1]
     normalized_square = meeting_square / (world_dimension - 1)
-    alice_reward = np.sin(4 * np.pi * normalized_square)
+    alice_reward = np.cos(4 * np.pi * normalized_square)
     bob_reward = -alice_reward
     return alice_reward, bob_reward

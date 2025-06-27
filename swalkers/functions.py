@@ -7,7 +7,7 @@ def softmax(vector, temperature):
 
 def calculate_entropy_of_policy_tensor(policy_tensor):
     # Calculate the normalization constant
-    norm_constant = np.log(policy_tensor.shape[2])* policy_tensor.shape[0] * policy_tensor.shape[1]
+    norm_constant = np.log2(policy_tensor.shape[2])* (policy_tensor.shape[0]**2)
 
     entropy = 0
     for i in range(policy_tensor.shape[0]):
@@ -21,7 +21,7 @@ def calculate_entropy_of_policy_tensor(policy_tensor):
 
 def calculate_entropy_of_A(A):
   # Calculate the normalization constant
-  norm_constant = np.log(A.shape[0])  
+  norm_constant = np.log2(A.shape[0])  
 
   # Find eigenvector with corresponding eigenvalue 1
   eigenvalues, eigenvectors = np.linalg.eig(A)
@@ -41,7 +41,7 @@ def calculate_entropy_of_A(A):
   eigenvector = eigenvector / np.sum(eigenvector)
 
   # Calculate the entropy
-  entropy = -np.sum(eigenvector * np.log(eigenvector + 1e-10))
+  entropy = -np.sum(eigenvector * np.log2(eigenvector + 1e-10))
 
   # Normalize the entropies
   entropy /= norm_constant
