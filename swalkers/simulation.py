@@ -1,6 +1,7 @@
 from tqdm.notebook import tqdm
 from .utilities import check_end_game, impose_reflective_boundary_conditions, build_matrix_A, remove_forbidden_compenetraion_processes
 from .functions import calculate_entropy_of_policy_tensor, calculate_entropy_of_A
+import numpy as np
 
 def play_one_game(walker_1, walker_2, world_dimension, reward_function):
     # Reset the walkers
@@ -71,7 +72,7 @@ def playgames(walker_1, walker_2, world_dimension, reward_function, number_of_ga
 
         if annealing:
             # Annealing the softmax temperature using the game number and number of games
-            walker_1.softmax_temperature = starting_softmax_temperature * (1 - game_number / (number_of_games * 1.1))
+            walker_1.softmax_temperature = max(0.1 , starting_softmax_temperature * (1 - game_number / number_of_games))
 
         game_results = play_one_game(
             walker_1, walker_2, world_dimension, reward_function

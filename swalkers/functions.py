@@ -70,7 +70,10 @@ def calculate_first_encounter_probabilities(starting_distribution, walker_1_poli
     add_absorbent_interactions(A)
     A = remove_forbidden_compenetraion_processes(A)
 
-    _, eigenvectors = np.linalg.eig(A)
+    eigenvlues, eigenvectors = np.linalg.eig(A)
+
+    print("Eigenvalues:", eigenvlues)
+
     M = np.linalg.inv(eigenvectors).T
     M = np.real(M)
     p=[]
