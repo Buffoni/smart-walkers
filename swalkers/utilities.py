@@ -119,7 +119,7 @@ def add_absorbent_interactions(A):
     for index in trap_indices_list:
         A[:, index] = np.eye(number_of_sites**2)[:, index]
 
-def remove_forbidden_compenetraion_processes(A):
+def remove_forbidden_compenetration_processes(A):
   A_non_comp = np.copy(A)
   number_of_sites = np.sqrt(A.shape[0]).astype(int)
 

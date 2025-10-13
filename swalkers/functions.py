@@ -1,7 +1,9 @@
 import numpy as np
-from .utilities import impose_reflective_boundary_conditions, build_matrix_A, add_absorbent_interactions, remove_forbidden_compenetraion_processes
+from .utilities import impose_reflective_boundary_conditions, build_matrix_A, add_absorbent_interactions, remove_forbidden_compenetration_processes
 
 def softmax(vector, temperature):
+    if temperature <= 0:
+        raise Exception('Temperature must be positive')
     exp_vector = np.exp(vector / temperature)
     return exp_vector / np.sum(exp_vector)
 
@@ -68,11 +70,11 @@ def calculate_first_encounter_probabilities(starting_distribution, walker_1_poli
 
     A = build_matrix_A(walker_1_policy_tensor, walker_2_policy_tensor)
     add_absorbent_interactions(A)
-    A = remove_forbidden_compenetraion_processes(A)
+    A = remove_forbidden_compenetration_processes(A)
 
-    eigenvlues, eigenvectors = np.linalg.eig(A)
+    eigenvalues, eigenvectors = np.linalg.eig(A)
 
-    print("Eigenvalues:", eigenvlues)
+    print("Eigenvalues:", eigenvalues)
 
     M = np.linalg.inv(eigenvectors).T
     M = np.real(M)
@@ -92,7 +94,7 @@ def calculate_first_encounter_times(A):
 
     A_modded = np.copy(A)
 
-    A_modded = remove_forbidden_compenetraion_processes(A_modded)
+    A_modded = remove_forbidden_compenetration_processes(A_modded)
 
     trap_indices_list = [i + (i-1)*number_of_squares - 1 for i in range(1, number_of_squares+1)]
 

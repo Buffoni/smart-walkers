@@ -1,5 +1,5 @@
 from tqdm.notebook import tqdm
-from .utilities import check_end_game, impose_reflective_boundary_conditions, build_matrix_A, remove_forbidden_compenetraion_processes
+from .utilities import check_end_game, impose_reflective_boundary_conditions, build_matrix_A, remove_forbidden_compenetration_processes
 from .functions import calculate_entropy_of_policy_tensor, calculate_entropy_of_A
 import numpy as np
 
@@ -65,7 +65,7 @@ def playgames(walker_1, walker_2, world_dimension, reward_function, number_of_ga
         impose_reflective_boundary_conditions(policy_tensor_1)
         impose_reflective_boundary_conditions(policy_tensor_2)
         A = build_matrix_A(policy_tensor_1, policy_tensor_2)
-        A = remove_forbidden_compenetraion_processes(A)
+        A = remove_forbidden_compenetration_processes(A)
 
         A_entropy = calculate_entropy_of_A(A)
         A_entropy_list.append(A_entropy)
