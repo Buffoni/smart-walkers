@@ -1,25 +1,25 @@
 import numpy as np
+from scipy.special import softmax
 from .utilities import impose_reflective_boundary_conditions, build_matrix_A, add_absorbent_interactions, remove_forbidden_compenetration_processes
 
-def softmax(vector, temperature):
+def boltzmann_exploration(tensor, temperature, axis=None):
     if temperature <= 0:
         raise Exception('Temperature must be positive')
-    exp_vector = np.exp(vector / temperature)
-    return exp_vector / np.sum(exp_vector)
+    return softmax(tensor / temperature, axis=axis)
 
 def calculate_entropy_of_policy_tensor(policy_tensor):
-    # Calculate the normalization constant
-    norm_constant = np.log2(policy_tensor.shape[2])* (policy_tensor.shape[0]**2)
+    """
+    Compute the normalized Shannon entropy of a policy tensor.
 
-    entropy = 0
-    for i in range(policy_tensor.shape[0]):
-        for j in range(policy_tensor.shape[1]):
-            for k in range(policy_tensor.shape[2]):
-                entropy -= policy_tensor[i, j, k] * np.log2(policy_tensor[i, j, k])
+    The total entropy is the sum of per-state Shannon entropies over all states:
 
-    entropy /= norm_constant
+        H = sum_{i,j} H(i,j) = -sum_{i,j} sum_k p_{i,j,k} * log2(p_{i,j,k})
 
-    return entropy
+    This is normalized by the maximum achievable value.
+    """
+    norm_constant = np.log2(policy_tensor.shape[2]) * (policy_tensor.shape[0] ** 2)
+    entropy = -np.sum(np.where(policy_tensor > 0, policy_tensor * np.log2(policy_tensor), 0.0))
+    return entropy / norm_constant
 
 def calculate_entropy_of_A(A):
   # Calculate the normalization constant
@@ -29,12 +29,10 @@ def calculate_entropy_of_A(A):
   eigenvalues, eigenvectors = np.linalg.eig(A)
 
   eigenvector = None
-  
   for i in range(len(eigenvalues)):
-    if np.isreal(eigenvalues[i]) and eigenvalues[i] - 1 < 1e-10:
+    if np.isreal(eigenvalues[i]) and abs(eigenvalues[i] - 1) < 1e-10:
       eigenvector = eigenvectors[:, i]
       break
-  
   if eigenvector is None:
     raise Exception('Eigenvector with eigenvalue 1 not found')
   
@@ -43,7 +41,7 @@ def calculate_entropy_of_A(A):
   eigenvector = eigenvector / np.sum(eigenvector)
 
   # Calculate the entropy
-  entropy = -np.sum(eigenvector * np.log2(eigenvector + 1e-10))
+  entropy = -np.sum(np.where(eigenvector > 0, eigenvector * np.log2(eigenvector), 0.0))
 
   # Normalize the entropies
   entropy /= norm_constant
@@ -65,6 +63,9 @@ def calculate_first_encounter_probabilities(starting_distribution, walker_1_poli
 
     number_of_squares = int(walker_1_policy_tensor.shape[0])
 
+    walker_1_policy_tensor = np.copy(walker_1_policy_tensor)
+    walker_2_policy_tensor = np.copy(walker_2_policy_tensor)
+
     impose_reflective_boundary_conditions(walker_1_policy_tensor)
     impose_reflective_boundary_conditions(walker_2_policy_tensor)
 
@@ -73,8 +74,6 @@ def calculate_first_encounter_probabilities(starting_distribution, walker_1_poli
     A = remove_forbidden_compenetration_processes(A)
 
     eigenvalues, eigenvectors = np.linalg.eig(A)
-
-    print("Eigenvalues:", eigenvalues)
 
     M = np.linalg.inv(eigenvectors).T
     M = np.real(M)

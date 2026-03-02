@@ -1,32 +1,49 @@
 import numpy as np
-from .functions import softmax
+from .functions import boltzmann_exploration
 
 class Walker():
     def __init__(self, name, start_position, world_dimension, use_brain, learn, learning_rate=0.5, discount_factor=1, softmax_temperature=1, greedy=False):
+        """
+        Arguments:
+        name: string, name of the walker
+        start_position: int, starting position of the walker
+        world_dimension: int, dimension of the world (number of squares)
+        use_brain: bool, whether the walker uses its brain to choose moves or moves randomly
+        learn: bool, whether the walker learns from the rewards or not (different from use_brain!)
+        learning_rate: float, learning rate for the Q-learning update
+        discount_factor: float, discount factor for the Q-learning update
+        softmax_temperature: float, temperature for the Boltzmann exploration
+        greedy: bool, whether the walker chooses the move with the highest Q-value or samples from the Boltzmann distribution
+
+        Methods:
+        reset(): resets the walker's position and memory to the initial state
+        update_memory(): updates the walker's memory with the current position, the other walker's position, and the move taken
+        get_policy_tensor(): returns the policy tensor derived from the Q-table using Boltzmann exploration
+        choose_move(): chooses a move based on the current policy (either greedy or stochastic)
+        check_if_move_is_possible(): checks if the chosen move is possible given the current position and the world boundaries
+        move(): updates the walker's position based on the chosen move and the other walker's position
+        update_brain(): updates the Q-table based on the received reward and the other walker's position
+        
+        """
+        # Initialization as random walker
+        self.q_table = np.ones((world_dimension, world_dimension, 3)) / 3
+
         self.name = name
         self.start_position = start_position
         self.position = start_position
+        self.world_dimension = world_dimension
+        self.learning_rate = learning_rate
+        self.discount_factor = discount_factor
+        self.softmax_temperature = softmax_temperature
+        self.use_brain = use_brain
+        self.learn = learn
+        self.greedy = greedy
 
         self.memory = {
             'my_previous_position': None,
             'my_previous_move': None,
             'other_walker_previous_position': None
         }
-
-        self.world_dimension = world_dimension
-
-        # Initialization as random walker
-        self.q_table = np.ones((world_dimension, world_dimension, 3)) / 3
-
-        self.learning_rate = learning_rate
-        self.discount_factor = discount_factor
-
-        self.softmax_temperature = softmax_temperature
-
-        self.use_brain = use_brain
-        self.learn = learn
-
-        self.greedy = greedy
 
     def reset(self):
         self.position = self.start_position
@@ -42,23 +59,18 @@ class Walker():
         self.memory['other_walker_previous_position'] = other_position
 
     def get_policy_tensor(self):
-        probability_tensor = np.zeros((self.world_dimension, self.world_dimension, 3))
-        for i in range(self.world_dimension):
-            for j in range(self.world_dimension):
-                probability_tensor[i, j] = softmax(self.q_table[i, j], self.softmax_temperature)
-        return probability_tensor
+        return boltzmann_exploration(self.q_table, self.softmax_temperature, axis=-1)
 
     def choose_move(self, other_walker_position):
-        if self.use_brain:
-            if self.greedy:
-                # Greedy policy
-                move = np.argmax(self.q_table[self.position, other_walker_position]) - 1
-            else:
-                # Policy
-                probabilities = softmax(self.q_table[self.position, other_walker_position], self.softmax_temperature)
-                move = np.random.choice([-1, 0, 1], p=probabilities)
+        if not self.use_brain:
+            return np.random.choice([-1, 0, 1])
+        if self.greedy:
+            # Greedy policy
+            move = np.argmax(self.q_table[self.position, other_walker_position]) - 1
         else:
-            move = np.random.choice([-1, 0, 1])
+            # Policy
+            probabilities = boltzmann_exploration(self.q_table[self.position, other_walker_position], self.softmax_temperature)
+            move = np.random.choice([-1, 0, 1], p=probabilities)    
         return move
 
     def check_if_move_is_possible(self, move):
@@ -66,10 +78,9 @@ class Walker():
         if self.position + move < 0:
             return False
         # Check if we end up over the world dimension
-        elif self.position + move >= self.world_dimension:
+        if self.position + move >= self.world_dimension:
             return False
-        else:
-            return True
+        return True
 
     def move(self, other_position):
         move = self.choose_move(other_position)
@@ -78,35 +89,19 @@ class Walker():
             self.position += move
 
     def update_brain(self, reward, other_position):
-        if self.learn:
-            old_q_value = self.q_table[self.memory['my_previous_position'], self.memory['other_walker_previous_position'], self.memory['my_previous_move'] + 1]
-            new_q_value = reward + self.discount_factor * np.max(self.q_table[self.position, other_position])
-            self.q_table[self.memory['my_previous_position'], self.memory['other_walker_previous_position'], self.memory['my_previous_move'] + 1] = \
-                (1-self.learning_rate) * old_q_value + self.learning_rate * new_q_value
-        else:
-            # If not learning, we do not update the Q-table
-            pass
-      
-def linear_reward(meeting_square, world_dimension, time=None):
-    alice_reward = ((world_dimension-1)/2 - meeting_square)/ ((world_dimension-1)/2)
-    bob_reward = -alice_reward
-    return alice_reward, bob_reward
+        if not self.learn:
+            return
+        
+        old_q_value = self.q_table[
+            self.memory['my_previous_position'],
+            self.memory['other_walker_previous_position'],
+            self.memory['my_previous_move'] + 1 # +1 because moves are -1, 0, 1 and we need shift to 0, 1, 2 for indexing
+            ]
+        
+        new_q_value = reward + self.discount_factor * np.max(self.q_table[self.position, other_position])
 
-def time_dependent_linear_reward(meeting_square, world_dimension, time=0):
-    alice_reward = ((world_dimension-1)/2 - meeting_square - time/((world_dimension-4)**2))/ ((world_dimension-1)/2)
-    bob_reward = -alice_reward
-    return alice_reward, bob_reward
-
-def sinusoidal_reward(meeting_square, world_dimension, time=None):
-    # Normalize the meeting square to the range [0, 1]
-    normalized_square = meeting_square / (world_dimension - 1)
-    alice_reward = np.sin(normalized_square * np.pi)
-    bob_reward = -alice_reward
-    return alice_reward, bob_reward
-
-def high_frequency_sinusoidal_reward(meeting_square, world_dimension, time=None):
-    # Normalize the meeting square to the range [0, 1]
-    normalized_square = meeting_square / (world_dimension - 1)
-    alice_reward = np.cos(4 * np.pi * normalized_square)
-    bob_reward = -alice_reward
-    return alice_reward, bob_reward
+        self.q_table[
+            self.memory['my_previous_position'],
+            self.memory['other_walker_previous_position'],
+            self.memory['my_previous_move'] + 1
+            ] = (1-self.learning_rate) * old_q_value + self.learning_rate * new_q_value

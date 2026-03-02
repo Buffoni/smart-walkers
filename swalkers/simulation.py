@@ -1,4 +1,4 @@
-from tqdm.notebook import tqdm
+from tqdm.auto import tqdm
 from .utilities import check_end_game, impose_reflective_boundary_conditions, build_matrix_A, remove_forbidden_compenetration_processes
 from .functions import calculate_entropy_of_policy_tensor, calculate_entropy_of_A
 import numpy as np
@@ -44,7 +44,7 @@ def play_one_game(walker_1, walker_2, world_dimension, reward_function):
 
     return game_results
 
-def playgames(walker_1, walker_2, world_dimension, reward_function, number_of_games, annealing=False):
+def playgames(walker_1, walker_2, world_dimension, reward_function, number_of_games, annealing=False, tqdm_position=0, desc=None):
     policy_entropy_list = []
     A_entropy_list = []
     meeting_squares = []
@@ -54,7 +54,7 @@ def playgames(walker_1, walker_2, world_dimension, reward_function, number_of_ga
 
     starting_softmax_temperature = walker_1.softmax_temperature
 
-    for game_number in tqdm(range(number_of_games), desc='Playing'):
+    for game_number in tqdm(range(number_of_games), desc=desc or walker_1.name, position=tqdm_position, leave=True):
 
         policy_tensor = walker_1.get_policy_tensor()
         policy_entropy = calculate_entropy_of_policy_tensor(policy_tensor)

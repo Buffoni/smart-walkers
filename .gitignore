@@ -1,1 +1,7 @@
 swalkers/__pycache__/
+.vscode/
+rewards_plots/
+dumb_walkers/
+dumb_walkers_plots/
+smart_alice/
+smart_alice_plots/
