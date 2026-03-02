@@ -1,9 +1,3 @@
-"""
-Simulate predator-prey games where both walkers are smart and trainable.
-Alice (predator) wants to catch Bob (prey) quickly; Bob wants to delay the encounter.
-The reward is time-dependent: Alice gets exp(-decay_rate * time), Bob gets the negative.
-"""
-
 import os
 import yaml
 import numpy as np
@@ -21,6 +15,7 @@ N_JOBS = 16
 SEED = 1000
 ANNEALING = True
 LEARNING_RATE = 0.5
+DISCOUNT_FACTOR = 0.95  # < 1 so time matters
 # ---------------------
 
 from functools import partial
@@ -37,7 +32,8 @@ def train_predator_prey(seed):
         world_dimension=WORLD_DIMENSION,
         use_brain=True,
         learn=True,
-        learning_rate=LEARNING_RATE
+        learning_rate=LEARNING_RATE,
+        discount_factor=DISCOUNT_FACTOR
     )
     bob = swalkers.Walker(
         name="Bob",
@@ -45,7 +41,8 @@ def train_predator_prey(seed):
         world_dimension=WORLD_DIMENSION,
         use_brain=True,
         learn=True,
-        learning_rate=LEARNING_RATE
+        learning_rate=LEARNING_RATE,
+        discount_factor=DISCOUNT_FACTOR
     )
 
     results = swalkers.simulation.playgames(
@@ -103,6 +100,7 @@ if __name__ == "__main__":
         "bob_start": BOB_START,
         "annealing": ANNEALING,
         "learning_rate": LEARNING_RATE,
+        "discount_factor": DISCOUNT_FACTOR,
         "seed": SEED,
         "reward_function": REWARD_FUNCTION.func.__name__,
     }
