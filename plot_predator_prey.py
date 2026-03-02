@@ -9,7 +9,7 @@ DATA_DIR = "predator_prey_data"
 SAVE_DIR = "predator_prey_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-plt.rcParams.update({"font.size": 18})
+plt.rcParams.update({"font.size": 20})
 
 # -- Load settings ---------------------------------------------------------
 with open(os.path.join(DATA_DIR, "settings.yaml")) as f:
