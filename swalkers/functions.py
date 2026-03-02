@@ -23,36 +23,36 @@ def calculate_entropy_of_policy_tensor(policy_tensor):
     return entropy / norm_constant
 
 def calculate_entropy_of_A(A):
-  """
-  Computes the entropy of the system by leveraging the eigenvector corresponding to eigenvalue of 1 in the transition matrix A.
-  The entropy is then calculated from the stationary distribution represented by this eigenvector.
-  The entropy is also normalized.
-  """
-  # Calculate the normalization constant
-  norm_constant = np.log2(A.shape[0])  
+    """
+    Computes the entropy of the system by leveraging the eigenvector corresponding to eigenvalue of 1 in the transition matrix A.
+    The entropy is then calculated from the stationary distribution represented by this eigenvector.
+    The entropy is also normalized.
+    """
+    # Calculate the normalization constant
+    norm_constant = np.log2(A.shape[0])
 
-  # Find eigenvector with corresponding eigenvalue 1
-  eigenvalues, eigenvectors = np.linalg.eig(A)
+    # Find eigenvector with corresponding eigenvalue 1
+    eigenvalues, eigenvectors = np.linalg.eig(A)
 
-  eigenvector = None
-  for i in range(len(eigenvalues)):
-    if np.isreal(eigenvalues[i]) and abs(eigenvalues[i] - 1) < 1e-10: # Check if the eigenvalue is real and close to 1
-      eigenvector = eigenvectors[:, i]
-      break
-  if eigenvector is None:
-    raise Exception('Eigenvector with eigenvalue 1 not found')
-  
-  # Normalize the eigenvector
-  eigenvector = np.real(eigenvector)
-  eigenvector = eigenvector / np.sum(eigenvector)
+    eigenvector = None
+    for i in range(len(eigenvalues)):
+        if np.isreal(eigenvalues[i]) and abs(eigenvalues[i] - 1) < 1e-10: # Check if the eigenvalue is real and close to 1
+            eigenvector = eigenvectors[:, i]
+            break
+    if eigenvector is None:
+        raise Exception('Eigenvector with eigenvalue 1 not found')
 
-  # Calculate the entropy (with usual instability handling for p*log(p) when p is close to 0)
-  entropy = -np.sum(np.where(eigenvector > 0, eigenvector * np.log2(eigenvector), 0.0))
+    # Normalize the eigenvector
+    eigenvector = np.real(eigenvector)
+    eigenvector = eigenvector / np.sum(eigenvector)
 
-  # Normalize the entropies
-  entropy /= norm_constant
+    # Calculate the entropy (with usual instability handling for p*log(p) when p is close to 0)
+    entropy = -np.sum(np.where(eigenvector > 0, eigenvector * np.log2(eigenvector), 0.0))
 
-  return entropy
+    # Normalize the entropies
+    entropy /= norm_constant
+
+    return entropy
 
 def calculate_starting_distribution_in_tensorspace(walker_1_start_pos, walker_2_start_pos, world_dimension):
     p0_walker_1 = np.zeros(world_dimension)
