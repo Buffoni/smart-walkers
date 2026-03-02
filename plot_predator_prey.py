@@ -2,7 +2,6 @@ import os
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import swalkers
 
 # -- I/O ------------------------------------------------------------------
@@ -13,7 +12,8 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 plt.rcParams.update({"font.size": 18})
 
 # -- Load settings ---------------------------------------------------------
-settings = yaml.safe_load(open(os.path.join(DATA_DIR, "settings.yaml")))
+with open(os.path.join(DATA_DIR, "settings.yaml")) as f:
+    settings = yaml.safe_load(f)
 world_dimension = settings["world_dimension"]
 alice_start     = settings["alice_start"]
 bob_start       = settings["bob_start"]

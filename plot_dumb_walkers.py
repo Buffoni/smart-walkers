@@ -12,7 +12,8 @@ plt.rcParams.update({'font.size': 20}) # Set a larger font size for better reada
 positions = np.load(os.path.join("dumb_walkers_data", "first_encounter_positions.npy"))
 alice_policy_tensor = np.load(os.path.join("dumb_walkers_data", "alice_policy.npy"))
 bob_policy_tensor = np.load(os.path.join("dumb_walkers_data", "bob_policy.npy"))
-settings = yaml.safe_load(open(os.path.join("dumb_walkers_data", "settings.yaml"), "r"))
+with open(os.path.join("dumb_walkers_data", "settings.yaml"), "r") as f:
+    settings = yaml.safe_load(f)
 
 world_dimension = settings["world_dimension"]
 alice_start = settings["walker_1_start"]
@@ -67,7 +68,6 @@ plt.close()
 swalkers.utilities.impose_reflective_boundary_conditions(alice_policy_tensor)
 swalkers.utilities.impose_reflective_boundary_conditions(bob_policy_tensor)
 A = swalkers.utilities.build_matrix_A(alice_policy_tensor, bob_policy_tensor)
-A = swalkers.utilities.remove_forbidden_compenetration_processes(A)
 time_vector, time_matrix = swalkers.functions.calculate_first_encounter_times(A)
 
 plt.figure(figsize=(8, 6))

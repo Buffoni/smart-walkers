@@ -2,7 +2,6 @@ import os
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D # Needed for 3D plotting
 import swalkers
 
 # ── I/O ─────────────────────────────────────────────────────────────────────
@@ -13,7 +12,8 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 plt.rcParams.update({"font.size": 18})
 
 # ── Load settings ────────────────────────────────────────────────────────────
-settings = yaml.safe_load(open(os.path.join(DATA_DIR, "settings.yaml")))
+with open(os.path.join(DATA_DIR, "settings.yaml")) as f:
+    settings = yaml.safe_load(f)
 world_dimension = settings["world_dimension"]
 alice_start     = settings["alice_start"]
 bob_start       = settings["bob_start"]
@@ -113,7 +113,6 @@ for name, d in data.items():
     swalkers.utilities.impose_reflective_boundary_conditions(alice_pt)
     swalkers.utilities.impose_reflective_boundary_conditions(bob_pt)
     A = swalkers.utilities.build_matrix_A(alice_pt, bob_pt)
-    A = swalkers.utilities.remove_forbidden_compenetration_processes(A)
     time_vector, time_matrix = swalkers.functions.calculate_first_encounter_times(A)
 
     # 3D bar plot of time matrix
