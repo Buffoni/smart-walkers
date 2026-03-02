@@ -9,10 +9,10 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 plt.rcParams.update({'font.size': 20}) # Set a larger font size for better readability
 
-positions = np.load(os.path.join("dumb_walkers", "first_encounter_positions.npy"))
-alice_policy_tensor = np.load(os.path.join("dumb_walkers", "alice_policy.npy"))
-bob_policy_tensor = np.load(os.path.join("dumb_walkers", "bob_policy.npy"))
-settings = yaml.safe_load(open(os.path.join("dumb_walkers", "settings.yaml"), "r"))
+positions = np.load(os.path.join("dumb_walkers_data", "first_encounter_positions.npy"))
+alice_policy_tensor = np.load(os.path.join("dumb_walkers_data", "alice_policy.npy"))
+bob_policy_tensor = np.load(os.path.join("dumb_walkers_data", "bob_policy.npy"))
+settings = yaml.safe_load(open(os.path.join("dumb_walkers_data", "settings.yaml"), "r"))
 
 world_dimension = settings["world_dimension"]
 alice_start = settings["walker_1_start"]
@@ -30,12 +30,26 @@ p = swalkers.functions.calculate_first_encounter_probabilities(
     walker_2_policy_tensor=bob_policy_tensor,
 )
 
-#---------------------------------------------------------------
+#------------------------------------------------------------------
 # FIRST ENCOUNTER POSITION DISTRIBUTION PLOT
 
 plt.figure(figsize=(12, 6))
-plt.plot(np.arange(world_dimension), p, marker='o', linestyle='-', color='red', label='Theoretical Probabilities')
-plt.hist(positions, bins=np.arange(-0.5, world_dimension + 0.5, 1), density=True, alpha=0.7, color='blue', edgecolor='black', label='Experimental Probabilities')
+plt.plot(
+    np.arange(world_dimension),
+    p,
+    marker='o',
+    linestyle='-',
+    color='red',
+    label='Theoretical Probabilities'
+    )
+plt.hist(
+    positions,
+    bins=np.arange(-0.5, world_dimension + 0.5, 1),
+    density=True,
+    color='blue',
+    edgecolor='black',
+    label='Experimental Probabilities'
+    )
 plt.xlabel('Site Index')
 plt.ylabel('Probability')
 plt.xticks(np.arange(0, world_dimension, 1))
@@ -43,40 +57,36 @@ plt.xlim(-0.5, world_dimension - 1 + 0.5)
 plt.grid()
 plt.legend()
 plt.tight_layout()
-
-# Save the plot
 plt.savefig(os.path.join(SAVE_DIR, "first_encounter_position_distribution.png"), bbox_inches="tight")
 plt.close()
+#------------------------------------------------------------------
 
-#---------------------------------------------------------------
+#------------------------------------------------------------------
 # FIRST ENCOUNTER TIME ANALYSIS -> BAR PLOT OF THE TIME VECTOR
 
 swalkers.utilities.impose_reflective_boundary_conditions(alice_policy_tensor)
 swalkers.utilities.impose_reflective_boundary_conditions(bob_policy_tensor)
-
-A = swalkers.utilities.build_matrix_A(
-    alice_policy_tensor,
-    bob_policy_tensor
-)
-
+A = swalkers.utilities.build_matrix_A(alice_policy_tensor, bob_policy_tensor)
 A = swalkers.utilities.remove_forbidden_compenetration_processes(A)
-
 time_vector, time_matrix = swalkers.functions.calculate_first_encounter_times(A)
 
-# Plot the time vectors as a bar plot
-
 plt.figure(figsize=(8, 6))
-plt.bar(np.arange(world_dimension**2), time_vector, color='blue', alpha=0.7, label='Time to First Encounter')
+plt.bar(
+    np.arange(world_dimension**2),
+    time_vector,
+    color='blue',
+    alpha=0.7,
+    label='Time to First Encounter'
+    )
 plt.xlabel('Meeting Site Index')
 plt.ylabel('Time to First Encounter')
 plt.legend()
 plt.grid(axis='y', alpha=0.75)
-
-# Save the plot
 plt.savefig(os.path.join(SAVE_DIR, "first_encounter_time_vector.png"), bbox_inches="tight")
 plt.close()
+#------------------------------------------------------------------
 
-#---------------------------------------------------------------
+#------------------------------------------------------------------
 # FIRST ENCOUNTER TIME ANALYSIS -> 3D BAR PLOT OF THE TIME MATRIX
 
 time_matrix = np.array(time_matrix)
@@ -96,18 +106,10 @@ dz = time_matrix.flatten()  # Heights of the bars
 fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111, projection='3d')
 ax.bar3d(xpos-0.5, ypos-0.5, zpos, dx, dy, dz, shade=True)
-
 ax.set_xlabel('Alice Position', labelpad=15)
 ax.set_ylabel('Bob Position', labelpad=15)
 ax.invert_xaxis()  # Invert x-axis to match the original matrix orientation
-
 plt.tight_layout()
-
-# Save the plot
 plt.savefig(os.path.join(SAVE_DIR, "first_encounter_time_matrix.png"), bbox_inches="tight", pad_inches=0.5)
 plt.close()
-
-
-
-
-
+#------------------------------------------------------------------

@@ -1,18 +1,12 @@
-"""
-Produce all plots for the smart Alice experiments.
-Reads data from the smart_alice/ folder written by simulate_smart_walkers.py.
-"""
-
 import os
 import yaml
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-
+from mpl_toolkits.mplot3d import Axes3D # Needed for 3D plotting
 import swalkers
 
 # ── I/O ─────────────────────────────────────────────────────────────────────
-DATA_DIR = "smart_alice"
+DATA_DIR = "smart_alice_data"
 SAVE_DIR = "smart_alice_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
@@ -37,7 +31,7 @@ for name in reward_names:
         "A_entropy":        np.load(os.path.join(d, "A_entropy.npy")),
         "alice_policy":     np.load(os.path.join(d, "alice_policy.npy")),
         "bob_policy":       np.load(os.path.join(d, "bob_policy.npy")),
-        "eval_meeting_squares": np.load(os.path.join(d, "eval_meeting_squares.npy")),
+        "fixed_meeting_squares": np.load(os.path.join(d, "fixed_meeting_squares.npy")),
     }
 
 def label(name):
@@ -97,7 +91,7 @@ for name, d in data.items():
     plt.figure(figsize=(12, 6))
     plt.plot(np.arange(world_dimension), p, marker="o", linestyle="-",
              color="red", label="Theoretical")
-    plt.hist(d["eval_meeting_squares"],
+    plt.hist(d["fixed_meeting_squares"],
              bins=np.arange(world_dimension + 1) - 0.5,
              density=True, alpha=0.7, color="blue", edgecolor="black",
              label="Experimental (final policy)")

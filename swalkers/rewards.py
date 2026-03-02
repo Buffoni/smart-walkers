@@ -24,3 +24,12 @@ def sinusoidal_reward(meeting_square, world_dimension, time=None):
     alice_reward = np.sin(np.pi * meeting_square / (world_dimension - 1))
     bob_reward = -alice_reward
     return alice_reward, bob_reward
+
+def predator_prey_reward(meeting_square, world_dimension, time=None):
+    """
+    When the walkers meet, Alice (predator) gets a positive reward, while Bob (prey) gets a negative reward.
+    """
+    alice_reward = +1
+    bob_reward = -1
+    return alice_reward, bob_reward
+    

@@ -25,8 +25,9 @@ class Walker():
         update_brain(): updates the Q-table based on the received reward and the other walker's position
         
         """
-        # Initialization as random walker
-        self.q_table = np.ones((world_dimension, world_dimension, 3)) / 3
+        # Q-table initialized to zeros: softmax(0,0,0) = (1/3,1/3,1/3) so the
+        # initial policy is uniform, while keeping Q-values at a neutral baseline
+        self.q_table = np.zeros((world_dimension, world_dimension, 3))
 
         self.name = name
         self.start_position = start_position
@@ -82,13 +83,16 @@ class Walker():
             return False
         return True
 
-    def move(self, other_position):
+    def choose_and_remember_move(self, other_position):
         move = self.choose_move(other_position)
         self.update_memory(self.position, other_position, move)
+
+    def apply_move(self):
+        move = self.memory['my_previous_move']
         if self.check_if_move_is_possible(move):
             self.position += move
 
-    def update_brain(self, reward, other_position):
+    def update_brain(self, reward, other_position, terminal=False):
         if not self.learn:
             return
         
@@ -98,7 +102,10 @@ class Walker():
             self.memory['my_previous_move'] + 1 # +1 because moves are -1, 0, 1 and we need shift to 0, 1, 2 for indexing
             ]
         
-        new_q_value = reward + self.discount_factor * np.max(self.q_table[self.position, other_position])
+        if terminal:
+            new_q_value = reward
+        else:
+            new_q_value = reward + self.discount_factor * np.max(self.q_table[self.position, other_position])
 
         self.q_table[
             self.memory['my_previous_position'],
