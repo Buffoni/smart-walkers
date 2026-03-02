@@ -25,6 +25,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+4. (Optional) If you want to run the chess simulations, you also need to install Stockfish:
+
+```bash
+sudo apt install stockfish
+```
+
 ## Usage
 
 The scripts starting with `simulate_` run the simulations and save the data, while the scripts starting with `plot_` read the saved data and produce the plots.
