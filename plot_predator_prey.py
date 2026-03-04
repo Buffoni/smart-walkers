@@ -27,29 +27,27 @@ bob_policy           = np.load(os.path.join(DATA_DIR, "bob_policy.npy"))
 fixed_meeting_squares = np.load(os.path.join(DATA_DIR, "fixed_meeting_squares.npy"))
 
 # -- 1. Alice (predator) policy entropy over games -------------------------
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 plt.plot(alice_policy_entropy)
 plt.xlabel("Game Number")
 plt.ylabel("Policy Entropy")
-plt.title("Alice (Predator) Policy Entropy")
 plt.grid()
 plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "alice_policy_entropy.png"), bbox_inches="tight")
 plt.close()
 
 # -- 2. Bob (prey) policy entropy over games -------------------------------
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 plt.plot(bob_policy_entropy)
 plt.xlabel("Game Number")
 plt.ylabel("Policy Entropy")
-plt.title("Bob (Prey) Policy Entropy")
 plt.grid()
 plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "bob_policy_entropy.png"), bbox_inches="tight")
 plt.close()
 
 # -- 3. A-matrix entropy over games ---------------------------------------
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 plt.plot(A_entropy)
 plt.xlabel("Game Number")
 plt.ylabel("Configuration Entropy")
@@ -71,7 +69,7 @@ p = swalkers.functions.calculate_first_encounter_probabilities(
     walker_2_policy_tensor=bob_policy,
 )
 
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(8, 6))
 plt.plot(np.arange(world_dimension), p, marker="o", linestyle="-",
          color="red", label="Theoretical")
 plt.hist(fixed_meeting_squares,
@@ -82,7 +80,6 @@ plt.xlabel("Site Index")
 plt.ylabel("Probability")
 plt.xticks(np.arange(world_dimension))
 plt.xlim(-0.5, world_dimension - 0.5)
-plt.title("Predator-Prey: First Encounter Position")
 plt.legend()
 plt.grid()
 plt.tight_layout()
@@ -112,7 +109,6 @@ ax = fig.add_subplot(111, projection="3d")
 ax.bar3d(xpos - 0.5, ypos - 0.5, zpos, dx, dy, dz, shade=True)
 ax.set_xlabel("Alice Position", labelpad=15)
 ax.set_ylabel("Bob Position",   labelpad=15)
-ax.set_title("Predator-Prey: Expected Meeting Time")
 ax.invert_xaxis()
 plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "time_matrix.png"),

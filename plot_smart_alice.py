@@ -38,7 +38,7 @@ def label(name):
     return name.replace("_", " ").title()
 
 # ── 1. Cumulative rewards ────────────────────────────────────────────────────
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(np.cumsum(d["alice_rewards"]), label=label(name))
 plt.axhline(y=0, color="black", linestyle="--")
@@ -51,7 +51,7 @@ plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.png"), bbox_inches="tight
 plt.close()
 
 # ── 2. Policy entropy over games ─────────────────────────────────────────────
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(d["policy_entropy"], label=label(name))
 plt.xlabel("Game Number")
@@ -63,7 +63,7 @@ plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.png"), bbox_inches="tight")
 plt.close()
 
 # ── 3. A-matrix entropy over games ───────────────────────────────────────────
-plt.figure(figsize=(8, 6))
+plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(d["A_entropy"], label=label(name))
 plt.xlabel("Game Number")
@@ -88,7 +88,7 @@ for name, d in data.items():
         walker_2_policy_tensor=d["bob_policy"],
     )
 
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(8, 8))
     plt.plot(np.arange(world_dimension), p, marker="o", linestyle="-",
              color="red", label="Theoretical")
     plt.hist(d["fixed_meeting_squares"],
@@ -99,7 +99,6 @@ for name, d in data.items():
     plt.ylabel("Probability")
     plt.xticks(np.arange(world_dimension))
     plt.xlim(-0.5, world_dimension - 0.5)
-    plt.title(label(name))
     plt.legend()
     plt.grid()
     plt.tight_layout()
@@ -130,7 +129,6 @@ for name, d in data.items():
     ax.bar3d(xpos - 0.5, ypos - 0.5, zpos, dx, dy, dz, shade=True)
     ax.set_xlabel("Alice Position", labelpad=15)
     ax.set_ylabel("Bob Position",   labelpad=15)
-    ax.set_title(label(name))
     ax.invert_xaxis()
     plt.tight_layout()
     plt.savefig(os.path.join(SAVE_DIR, f"time_matrix_{name}.png"),
