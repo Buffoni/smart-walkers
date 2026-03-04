@@ -21,7 +21,8 @@ class Walker():
         get_policy_tensor(): returns the policy tensor derived from the Q-table using Boltzmann exploration
         choose_move(): chooses a move based on the current policy (either greedy or stochastic)
         check_if_move_is_possible(): checks if the chosen move is possible given the current position and the world boundaries
-        move(): updates the walker's position based on the chosen move and the other walker's position
+        choose_and_remember_move(): combines the move choice and memory update in one step
+        apply_move(): applies the chosen move to update the walker's position
         update_brain(): updates the Q-table based on the received reward and the other walker's position
         
         """

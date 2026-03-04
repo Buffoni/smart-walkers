@@ -3,6 +3,7 @@ import yaml
 import numpy as np
 from joblib import Parallel, delayed
 from tqdm import tqdm
+from functools import partial
 import swalkers
 
 # --- Configuration ---
@@ -15,10 +16,9 @@ N_JOBS = 16
 SEED = 1000
 ANNEALING = True
 LEARNING_RATE = 0.5
-DISCOUNT_FACTOR = 0.95  # < 1 so time matters
+DISCOUNT_FACTOR = 0.8  # < 1 so time matters
 # ---------------------
 
-from functools import partial
 REWARD_FUNCTION = partial(swalkers.rewards.predator_prey_reward)
 
 

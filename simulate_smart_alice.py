@@ -15,6 +15,7 @@ N_JOBS = 8
 SEED = 1000
 ANNEALING = True
 LEARNING_RATE = 0.5
+DISCOUNT_FACTOR = 1.0
 # ---------------------
 
 REWARD_FUNCTIONS = [
@@ -34,7 +35,8 @@ def play_with_learning_alice(reward_function, seed):
         world_dimension=WORLD_DIMENSION,
         use_brain=True,
         learn=True,
-        learning_rate=LEARNING_RATE
+        learning_rate=LEARNING_RATE,
+        discount_factor=DISCOUNT_FACTOR
     )
     bob = swalkers.Walker(
         name="Bob",
@@ -42,6 +44,7 @@ def play_with_learning_alice(reward_function, seed):
         world_dimension=WORLD_DIMENSION,
         use_brain=False,
         learn=False,
+        discount_factor=DISCOUNT_FACTOR
     )
 
     results = swalkers.simulation.playgames(

@@ -2,7 +2,7 @@
 swalkers package initialization
 
 The 's' in 'swalkers' stands both for 'smart' and 'simple', since this code is made to work only in 1D.
-Even if the techniques reported are good for any dimension.
+But the techniques reported are good for any dimension.
 '''
 
 __author__ = "Gianluca Peri"
