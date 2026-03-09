@@ -1,8 +1,3 @@
-"""
-Simulate 100000 games between dumb (random) walkers in parallel and save
-the first encounter time and position for each game to the dumb_walkers/ folder.
-"""
-
 import os
 import yaml
 import numpy as np

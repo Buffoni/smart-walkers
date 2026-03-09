@@ -4,14 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import swalkers
 
-# ── I/O ─────────────────────────────────────────────────────────────────────
+# --I/O------------------------------------------------------------------------
 DATA_DIR = "smart_alice_data"
 SAVE_DIR = "smart_alice_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 plt.rcParams.update({"font.size": 20})
 
-# ── Load settings ────────────────────────────────────────────────────────────
+# --Load settings--------------------------------------------------------------
 with open(os.path.join(DATA_DIR, "settings.yaml")) as f:
     settings = yaml.safe_load(f)
 world_dimension = settings["world_dimension"]
@@ -19,7 +19,7 @@ alice_start     = settings["alice_start"]
 bob_start       = settings["bob_start"]
 reward_names    = settings["reward_functions"]
 
-# ── Load per-reward data ─────────────────────────────────────────────────────
+# --Load per-reward data-------------------------------------------------------
 data = {}
 for name in reward_names:
     d = os.path.join(DATA_DIR, name)
@@ -37,7 +37,7 @@ for name in reward_names:
 def label(name):
     return name.replace("_", " ").title()
 
-# ── 1. Cumulative rewards ────────────────────────────────────────────────────
+# -- 1. Cumulative rewards ----------------------------------------------------
 plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(np.cumsum(d["alice_rewards"]), label=label(name))
@@ -50,7 +50,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.png"), bbox_inches="tight")
 plt.close()
 
-# ── 2. Policy entropy over games ─────────────────────────────────────────────
+# -- 2. Policy entropy over games ---------------------------------------------
 plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(d["policy_entropy"], label=label(name))
@@ -62,7 +62,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.png"), bbox_inches="tight")
 plt.close()
 
-# ── 3. A-matrix entropy over games ───────────────────────────────────────────
+# -- 3. A-matrix entropy over games -------------------------------------------
 plt.figure(figsize=(8, 8))
 for name, d in data.items():
     plt.plot(d["A_entropy"], label=label(name))
@@ -74,7 +74,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(SAVE_DIR, "A_entropy.png"), bbox_inches="tight")
 plt.close()
 
-# ── 4. First encounter position: theoretical vs training experimental ─────────
+# -- 4. First encounter position: theoretical vs training experimental --------
 P0 = swalkers.functions.calculate_starting_distribution_in_tensorspace(
     walker_1_start_pos=alice_start,
     walker_2_start_pos=bob_start,
@@ -105,7 +105,7 @@ for name, d in data.items():
     plt.savefig(os.path.join(SAVE_DIR, f"first_encounter_position_{name}.png"), bbox_inches="tight")
     plt.close()
 
-# ── 5. Time vector and time matrix ───────────────────────────────────────
+# -- 5. Time vector and time matrix -------------------------------------------
 for name, d in data.items():
     alice_pt = np.copy(d["alice_policy"])
     bob_pt   = np.copy(d["bob_policy"])
