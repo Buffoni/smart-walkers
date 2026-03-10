@@ -9,7 +9,10 @@ DATA_DIR = "smart_alice_data"
 SAVE_DIR = "smart_alice_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-plt.rcParams.update({"font.size": 20})
+FONT_SIZE = 25
+FIGSIZE = (8, 8)
+DPI = 100
+plt.rcParams.update({"font.size": FONT_SIZE, "figure.dpi": DPI})
 
 # --Load settings--------------------------------------------------------------
 with open(os.path.join(DATA_DIR, "settings.yaml")) as f:
@@ -38,40 +41,52 @@ def label(name):
     return name.replace("_", " ").title()
 
 # -- 1. Cumulative rewards ----------------------------------------------------
-plt.figure(figsize=(8, 8))
+_BF = FONT_SIZE + 6
+plt.figure(figsize=(8, 11))
 for name, d in data.items():
-    plt.plot(np.cumsum(d["alice_rewards"]), label=label(name))
+    plt.plot(np.cumsum(d["alice_rewards"]), label=label(name), linewidth=3)
 plt.axhline(y=0, color="black", linestyle="--")
-plt.xlabel("Game Number")
-plt.ylabel("Cumulative Reward")
-plt.legend()
+plt.xlabel("Game Number", fontsize=_BF)
+plt.ylabel("Cumulative Reward", fontsize=_BF)
+plt.tick_params(axis="both", labelsize=_BF - 2)
+_leg = plt.legend(fontsize=_BF - 3, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+for h in _leg.legend_handles:
+    h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.png"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 2. Policy entropy over games ---------------------------------------------
-plt.figure(figsize=(8, 8))
+_BF = FONT_SIZE + 6
+plt.figure(figsize=(8, 11))
 for name, d in data.items():
     plt.plot(d["policy_entropy"], label=label(name))
-plt.xlabel("Game Number")
-plt.ylabel("Policy Entropy")
-plt.legend()
+plt.xlabel("Game Number", fontsize=_BF)
+plt.ylabel("Policy Entropy", fontsize=_BF)
+plt.tick_params(axis="both", labelsize=_BF - 2)
+_leg = plt.legend(fontsize=_BF - 3, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+for h in _leg.legend_handles:
+    h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.png"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 3. A-matrix entropy over games -------------------------------------------
-plt.figure(figsize=(8, 8))
+_BF = FONT_SIZE + 6
+plt.figure(figsize=(8, 11))
 for name, d in data.items():
     plt.plot(d["A_entropy"], label=label(name))
-plt.xlabel("Game Number")
-plt.ylabel("Configuration Entropy")
-plt.legend()
+plt.xlabel("Game Number", fontsize=_BF)
+plt.ylabel("Configuration Entropy", fontsize=_BF)
+plt.tick_params(axis="both", labelsize=_BF - 2)
+_leg = plt.legend(fontsize=_BF - 3, loc="lower center", bbox_to_anchor=(0.5, 1.02))
+for h in _leg.legend_handles:
+    h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "A_entropy.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "A_entropy.png"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 4. First encounter position: theoretical vs training experimental --------
@@ -88,21 +103,21 @@ for name, d in data.items():
         walker_2_policy_tensor=d["bob_policy"],
     )
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=FIGSIZE)
     plt.plot(np.arange(world_dimension), p, marker="o", linestyle="-",
              color="red", label="Theoretical")
     plt.hist(d["fixed_meeting_squares"],
              bins=np.arange(world_dimension + 1) - 0.5,
              density=True, alpha=0.7, color="blue", edgecolor="black",
-             label="Experimental (final policy)")
-    plt.xlabel("Site Index")
-    plt.ylabel("Probability")
+             label="Experimental")
+    plt.xlabel("Site Index", fontsize=FONT_SIZE)
+    plt.ylabel("Probability", fontsize=FONT_SIZE)
     plt.xticks(np.arange(world_dimension))
     plt.xlim(-0.5, world_dimension - 0.5)
-    plt.legend()
+    plt.legend(fontsize=FONT_SIZE, loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2)
     plt.grid()
     plt.tight_layout()
-    plt.savefig(os.path.join(SAVE_DIR, f"first_encounter_position_{name}.png"), bbox_inches="tight")
+    plt.savefig(os.path.join(SAVE_DIR, f"first_encounter_position_{name}.png"), bbox_inches="tight", dpi=DPI)
     plt.close()
 
 # -- 5. Time vector and time matrix -------------------------------------------
@@ -124,15 +139,18 @@ for name, d in data.items():
     dx = dy = 0.8
     dz = matrix.flatten()
 
-    fig = plt.figure(figsize=(8, 6))
+    from matplotlib.patches import Patch
+    fig = plt.figure(figsize=FIGSIZE, dpi=DPI)
     ax = fig.add_subplot(111, projection="3d")
-    ax.bar3d(xpos - 0.5, ypos - 0.5, zpos, dx, dy, dz, shade=True)
-    ax.set_xlabel("Alice Position", labelpad=15)
-    ax.set_ylabel("Bob Position",   labelpad=15)
+    ax.bar3d(xpos - 0.5, ypos - 0.5, zpos, dx, dy, dz, shade=True, edgecolor="black", color="C0")
+    ax.set_xlabel("Alice Position", labelpad=15, fontsize=FONT_SIZE-2)
+    ax.set_ylabel("Bob Position",   labelpad=15, fontsize=FONT_SIZE-2)
+    ax.zaxis.set_tick_params(labelsize=FONT_SIZE-2)
+    ax.tick_params(axis="both", labelsize=FONT_SIZE-2)
     ax.invert_xaxis()
-    plt.tight_layout()
-    plt.savefig(os.path.join(SAVE_DIR, f"time_matrix_{name}.png"),
-                bbox_inches="tight", pad_inches=0.5)
+    proxy = Patch(facecolor="C0", edgecolor="black", label="Time to First Encounter")
+    ax.legend(handles=[proxy], fontsize=FONT_SIZE-2, loc="upper center", bbox_to_anchor=(0.5, 1.12), ncol=1)
+    fig.savefig(os.path.join(SAVE_DIR, f"time_matrix_{name}.png"), bbox_inches="tight", dpi=DPI)
     plt.close()
 
 print(f"All plots saved to '{SAVE_DIR}/'")
