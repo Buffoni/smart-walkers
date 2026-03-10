@@ -9,6 +9,7 @@ DATA_DIR = "predator_prey_data"
 SAVE_DIR = "predator_prey_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+DPI = 700
 plt.rcParams.update({"font.size": 20})
 
 # -- Load settings ---------------------------------------------------------
@@ -34,7 +35,7 @@ plt.ylabel("Policy Entropy", fontsize=26)
 plt.tick_params(axis="both", labelsize=22)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "alice_policy_entropy.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "alice_policy_entropy.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 2. Bob (prey) policy entropy over games -------------------------------
@@ -45,7 +46,7 @@ plt.ylabel("Policy Entropy", fontsize=26)
 plt.tick_params(axis="both", labelsize=22)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "bob_policy_entropy.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "bob_policy_entropy.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 3. A-matrix entropy over games ---------------------------------------
@@ -56,7 +57,7 @@ plt.ylabel("Configuration Entropy", fontsize=26)
 plt.tick_params(axis="both", labelsize=22)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "A_entropy.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "A_entropy.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 4. First encounter position: theoretical vs experimental (fixed) ------
@@ -86,7 +87,7 @@ plt.xlim(-0.5, world_dimension - 0.5)
 plt.legend()
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "first_encounter_position.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "first_encounter_position.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 5. Time matrix -------------------------------------------------------
@@ -114,8 +115,8 @@ ax.set_xlabel("Alice Position", labelpad=15)
 ax.set_ylabel("Bob Position",   labelpad=15)
 ax.invert_xaxis()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "time_matrix.png"),
-            bbox_inches="tight", pad_inches=0.5)
+plt.savefig(os.path.join(SAVE_DIR, "time_matrix.jpg"),
+            bbox_inches="tight", pad_inches=0.5, dpi=DPI)
 plt.close()
 
 print(f"All plots saved to '{SAVE_DIR}/'")

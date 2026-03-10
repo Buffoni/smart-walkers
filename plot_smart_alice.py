@@ -11,7 +11,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 FONT_SIZE = 25
 FIGSIZE = (8, 8)
-DPI = 100
+DPI = 700
 plt.rcParams.update({"font.size": FONT_SIZE, "figure.dpi": DPI})
 
 # --Load settings--------------------------------------------------------------
@@ -54,7 +54,7 @@ for h in _leg.legend_handles:
     h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.png"), bbox_inches="tight", dpi=DPI)
+plt.savefig(os.path.join(SAVE_DIR, "cumulative_rewards.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 2. Policy entropy over games ---------------------------------------------
@@ -70,7 +70,7 @@ for h in _leg.legend_handles:
     h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.png"), bbox_inches="tight", dpi=DPI)
+plt.savefig(os.path.join(SAVE_DIR, "policy_entropy.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 3. A-matrix entropy over games -------------------------------------------
@@ -86,7 +86,7 @@ for h in _leg.legend_handles:
     h.set_linewidth(4)
 plt.grid()
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "A_entropy.png"), bbox_inches="tight", dpi=DPI)
+plt.savefig(os.path.join(SAVE_DIR, "A_entropy.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 # -- 4. First encounter position: theoretical vs training experimental --------
@@ -117,7 +117,7 @@ for name, d in data.items():
     plt.legend(fontsize=FONT_SIZE, loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=2)
     plt.grid()
     plt.tight_layout()
-    plt.savefig(os.path.join(SAVE_DIR, f"first_encounter_position_{name}.png"), bbox_inches="tight", dpi=DPI)
+    plt.savefig(os.path.join(SAVE_DIR, f"first_encounter_position_{name}.jpg"), bbox_inches="tight", dpi=DPI)
     plt.close()
 
 # -- 5. Time vector and time matrix -------------------------------------------
@@ -150,7 +150,7 @@ for name, d in data.items():
     ax.invert_xaxis()
     proxy = Patch(facecolor="C0", edgecolor="black", label="Time to First Encounter")
     ax.legend(handles=[proxy], fontsize=FONT_SIZE-2, loc="upper center", bbox_to_anchor=(0.5, 1.12), ncol=1)
-    fig.savefig(os.path.join(SAVE_DIR, f"time_matrix_{name}.png"), bbox_inches="tight", dpi=DPI)
+    fig.savefig(os.path.join(SAVE_DIR, f"time_matrix_{name}.jpg"), bbox_inches="tight", dpi=DPI)
     plt.close()
 
 print(f"All plots saved to '{SAVE_DIR}/'")

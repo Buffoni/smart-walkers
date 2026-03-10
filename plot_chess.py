@@ -8,6 +8,7 @@ DATA_DIR = "chess_data"
 SAVE_DIR = "chess_plots"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+DPI = 700
 plt.rcParams.update({"font.size": 20})
 
 # -- Load settings ---------------------------------------------------------
@@ -33,7 +34,7 @@ plt.xlabel("Stockfish Skill Level")
 plt.ylabel(f"Entropy ({total_moves} moves)")
 plt.grid(True)
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "entropy_vs_skill.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "entropy_vs_skill.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 
 print(f"All plots saved to '{SAVE_DIR}/'")

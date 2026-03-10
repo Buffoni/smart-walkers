@@ -10,7 +10,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 FONT_SIZE = 22
 FIGSIZE = (9, 7)
-DPI = 100
+DPI = 700
 plt.rcParams.update({'font.size': FONT_SIZE, 'figure.dpi': DPI}) # Set a larger font size for better readability and fixed DPI
 
 positions = np.load(os.path.join("dumb_walkers_data", "first_encounter_positions.npy"))
@@ -62,7 +62,7 @@ plt.xlim(-0.5, world_dimension - 1 + 0.5)
 plt.grid()
 plt.legend(fontsize=plt.rcParams['font.size'], loc='upper center', bbox_to_anchor=(0.5, 1.2), ncol=2)
 plt.tight_layout()
-plt.savefig(os.path.join(SAVE_DIR, "first_encounter_position_distribution.png"), bbox_inches="tight")
+plt.savefig(os.path.join(SAVE_DIR, "first_encounter_position_distribution.jpg"), bbox_inches="tight", dpi=DPI)
 plt.close()
 #------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ ax.tick_params(axis='both', labelsize=FONT_SIZE)
 ax.legend(fontsize=FONT_SIZE, loc='upper center', bbox_to_anchor=(0.5, 1.17), ncol=1)
 ax.grid(axis='y', alpha=0.75)
 fig.subplots_adjust(top=0.85)
-fig.savefig(os.path.join(SAVE_DIR, "first_encounter_time_vector.png"), dpi=DPI)
+fig.savefig(os.path.join(SAVE_DIR, "first_encounter_time_vector.jpg"), dpi=DPI)
 plt.close(fig)
 #------------------------------------------------------------------
 
@@ -121,6 +121,6 @@ ax.invert_xaxis()  # Invert x-axis to match the original matrix orientation
 proxy = Patch(facecolor='C0', edgecolor='black', label='Time to First Encounter')
 ax.legend(handles=[proxy], fontsize=FONT_SIZE, loc='upper center', bbox_to_anchor=(0.5, 1.12), ncol=1)
 fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.88)
-fig.savefig(os.path.join(SAVE_DIR, "first_encounter_time_matrix.png"), dpi=DPI)
+fig.savefig(os.path.join(SAVE_DIR, "first_encounter_time_matrix.jpg"), dpi=DPI)
 plt.close(fig)
 #------------------------------------------------------------------
